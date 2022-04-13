@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        document.cookie = "access_token=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE4NTI5ODMxOTA2In0.hQ99xYwzipXNJcDyQf1LvI1r71LAMRyfePBo4O3yxCo"
+        let socket = new WebSocket("ws://localhost:3000/ws");
+        console.log("Attempting to connect");
+
+        socket.onopen = () => {
+            console.log("Connection successfull")
+            socket.send("Hi from client")
+        }
+
+        socket.onmessage = (event) => {
+            console.log(JSON.parse(event.data))
+        }
+
+        socket.onclose = () => {
+            console.log("Closing socket connection")
+        }
+
+        socket.onerror = (err) => {
+            console.log(`Socket error : ${err}`)
+        }
+
+    </script>
+</body>
+
+</html>
