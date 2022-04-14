@@ -29,9 +29,9 @@ type Game struct {
 	BoardState     BoardState
 }
 
-func (g *Game) Play(playerId string, params PlayMoveParams) error {
+func (g *Game) Play(playerNick string, params PlayMoveParams) error {
 	state := g.WhoPlays
-	if state.Player.Id != playerId {
+	if state.Player.Nick != playerNick {
 		return &modelErrors.IllegalTurn{}
 	}
 
@@ -53,7 +53,7 @@ func (g *Game) Play(playerId string, params PlayMoveParams) error {
 	// Send response to other players
 	data, _ := json.Marshal(params)
 	for _, value := range g.Observers {
-		if value.Id != playerId {
+		if value.Nick != playerNick {
 			value.Chan <- data
 		}
 	}

@@ -5,7 +5,7 @@ import (
 )
 
 type Player struct {
-	Id   string
+	Nick string
 	Conn *ws.Conn
 	//LastSeen    time.Time
 	//IsOnline    bool

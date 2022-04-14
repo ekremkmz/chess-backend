@@ -26,7 +26,7 @@ const (
 )
 
 func AddPlayer(p *model.Player) {
-	if _, loaded := ConnectedPlayers.LoadOrStore(p.Id, p); !loaded {
+	if _, loaded := ConnectedPlayers.LoadOrStore(p.Nick, p); !loaded {
 		wg := sync.WaitGroup{}
 		go func() {
 			wg.Add(1)
@@ -42,15 +42,15 @@ func AddPlayer(p *model.Player) {
 	}
 }
 
-func GetPlayer(id string) (*model.Player, error) {
-	if val, ok := ConnectedPlayers.Load(id); ok {
+func GetPlayer(nick string) (*model.Player, error) {
+	if val, ok := ConnectedPlayers.Load(nick); ok {
 		return val.(*model.Player), nil
 	}
-	return nil, &modelErrors.PlayerNotFoundError{Id: id}
+	return nil, &modelErrors.PlayerNotFoundError{Nick: nick}
 }
 
-func DeletePlayer(id string) {
-	ConnectedPlayers.Delete(id)
+func DeletePlayer(nick string) {
+	ConnectedPlayers.Delete(nick)
 }
 
 func sendAck(p *model.Player, commandId string) {
@@ -106,7 +106,7 @@ func playerWriteHandler(p *model.Player) {
 
 func playerReadHandler(p *model.Player) {
 	defer func() {
-		DeletePlayer(p.Id)
+		DeletePlayer(p.Nick)
 		p.Conn.Close()
 		close(p.Chan)
 	}()
@@ -188,7 +188,7 @@ func playerReadHandler(p *model.Player) {
 				break
 			}
 
-			if err := g.Play(p.Id, params); err != nil {
+			if err := g.Play(p.Nick, params); err != nil {
 				sendErr(p, msg.CommandId, err)
 				break
 			}

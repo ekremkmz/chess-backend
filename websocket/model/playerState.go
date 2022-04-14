@@ -22,8 +22,8 @@ func (p *PlayerState) ToMap() map[string]any {
 		return nil
 	}
 	return map[string]any{
-		"playerId": p.Player.Id,
-		"color":    p.Color,
-		"timeleft": p.TimeLeft,
+		"playerNick": p.Player.Nick,
+		"color":      p.Color,
+		"timeleft":   p.TimeLeft,
 	}
 }
