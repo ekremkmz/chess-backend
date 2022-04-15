@@ -21,5 +21,5 @@ func Profile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "User not found"})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": gin.H{"nick": user.Nick, "email": user.Email}})
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": gin.H{"nick": user.Nick, "email": user.Email}})
 }
