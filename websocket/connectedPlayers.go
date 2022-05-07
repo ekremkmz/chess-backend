@@ -26,7 +26,7 @@ const (
 )
 
 func AddPlayer(p *model.Player) {
-	if _, loaded := ConnectedPlayers.LoadOrStore(p.Nick, p); !loaded {
+	if value, loaded := ConnectedPlayers.LoadOrStore(p.Nick, p); !loaded {
 		wg := sync.WaitGroup{}
 		go func() {
 			wg.Add(1)
@@ -39,6 +39,10 @@ func AddPlayer(p *model.Player) {
 			wg.Done()
 		}()
 		wg.Wait()
+	} else {
+		//TODO: Reconnecting (there is a problem I think but not sure)
+		close(value.(*model.Player).Chan)
+		value.(*model.Player).Conn = p.Conn
 	}
 }
 
@@ -74,9 +78,9 @@ func sendErr(p *model.Player, commandId string, err error) {
 
 func sendSuccess(p *model.Player, commandId string, data json.RawMessage) {
 	js := map[string]any{
-		"commmandId": commandId,
-		"command":    "success",
-		"data":       data,
+		"commandId": commandId,
+		"command":   "success",
+		"data":      data,
 	}
 	msg, _ := json.Marshal(js)
 	p.Chan <- msg
@@ -117,10 +121,11 @@ func playerReadHandler(p *model.Player) {
 
 	var msg model.Command
 	for {
+		// Read messages as Command structs from the connection as long as the connection
 		if err := p.Conn.ReadJSON(&msg); err != nil {
-
 			switch err.(type) {
 			case *json.SyntaxError:
+				log.Printf(err.Error())
 				continue
 			case *ws.CloseError:
 				if ws.IsUnexpectedCloseError(err, ws.CloseGoingAway, ws.CloseAbnormalClosure) {
@@ -130,8 +135,14 @@ func playerReadHandler(p *model.Player) {
 			}
 			break
 		}
+
+		// Log messages
+		logmsg, _ := json.Marshal(msg)
+		log.Printf(string(logmsg))
+
 		sendAck(p, msg.CommandId)
 
+		// Handle command that are sent
 		switch msg.Command {
 		case "createNewGame":
 			var params model.CreateNewGameParams
@@ -181,9 +192,7 @@ func playerReadHandler(p *model.Player) {
 				break
 			}
 
-			err = g.CheckPlayable()
-
-			if err != nil {
+			if err = g.CheckPlayable(); err != nil {
 				sendErr(p, msg.CommandId, err)
 				break
 			}
@@ -193,7 +202,7 @@ func playerReadHandler(p *model.Player) {
 				break
 			}
 
-			data, _ := json.Marshal(g.WhoWaits.ToMap())
+			data, _ := json.Marshal(g.WhoWaits().ToMap())
 
 			sendSuccess(p, msg.CommandId, data)
 

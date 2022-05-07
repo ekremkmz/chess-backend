@@ -47,3 +47,14 @@ func (b *BoardState) Play(params PlayMoveParams) error {
 	board[source.x][source.y] = ""
 	return nil
 }
+
+func (b *BoardState) ToMap() map[string]any {
+	return map[string]any{
+		"board":          b.Board,
+		"activeColor":    b.ActiveColor,
+		"castlingRights": b.CastlingRights,
+		"enPassant":      b.EnPassant,
+		"halfMove":       b.HalfMove,
+		"fullMove":       b.FullMove,
+	}
+}

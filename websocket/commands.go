@@ -29,11 +29,11 @@ func CreateNewGame(c model.CreateNewGameParams, p *model.Player) *model.Game {
 
 	switch c.Color {
 	case "w":
-		g.WhoPlays = model.PlayerState{Player: p, TimeLeft: time.Duration(min) * time.Minute, Color: model.White}
-		g.WhoWaits = model.PlayerState{TimeLeft: time.Duration(min) * time.Minute, Color: model.Black}
+		g.White = &model.PlayerState{Player: p, TimeLeft: time.Duration(min) * time.Minute}
+		g.Black = &model.PlayerState{TimeLeft: time.Duration(min) * time.Minute}
 	case "b":
-		g.WhoPlays = model.PlayerState{TimeLeft: time.Duration(min) * time.Minute, Color: model.White}
-		g.WhoWaits = model.PlayerState{Player: p, TimeLeft: time.Duration(min) * time.Minute, Color: model.Black}
+		g.White = &model.PlayerState{TimeLeft: time.Duration(min) * time.Minute}
+		g.Black = &model.PlayerState{Player: p, TimeLeft: time.Duration(min) * time.Minute}
 	}
 
 	g.TimeControl = time.Duration(min) * time.Minute
@@ -56,10 +56,10 @@ func ConnectToGame(c model.ConnectToGameParams, p *model.Player) (*model.Game, e
 
 	if g.GameState == model.WaitsOpponent {
 		switch {
-		case g.WhoWaits.Player == nil:
-			g.WhoWaits.Player = p
-		case g.WhoPlays.Player == nil:
-			g.WhoPlays.Player = p
+		case g.White.Player == nil:
+			g.White.Player = p
+		case g.Black.Player == nil:
+			g.Black.Player = p
 		default:
 		}
 		g.GameState = model.WaitsFirstMove
