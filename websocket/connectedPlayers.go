@@ -26,24 +26,9 @@ const (
 )
 
 func AddPlayer(p *model.Player) {
-	if value, loaded := ConnectedPlayers.LoadOrStore(p.Nick, p); !loaded {
-		wg := sync.WaitGroup{}
-		go func() {
-			wg.Add(1)
-			playerReadHandler(p)
-			wg.Done()
-		}()
-		go func() {
-			wg.Add(1)
-			playerWriteHandler(p)
-			wg.Done()
-		}()
-		wg.Wait()
-	} else {
-		//TODO: Reconnecting (there is a problem I think but not sure)
-		close(value.(*model.Player).Chan)
-		value.(*model.Player).Conn = p.Conn
-	}
+	ConnectedPlayers.Store(p.Nick, p)
+	go playerReadHandler(p)
+	go playerWriteHandler(p)
 }
 
 func GetPlayer(nick string) (*model.Player, error) {
@@ -88,7 +73,11 @@ func sendSuccess(p *model.Player, commandId string, data json.RawMessage) {
 
 func playerWriteHandler(p *model.Player) {
 	ticker := time.NewTicker(pingPeriod)
-	defer ticker.Stop()
+	defer func() {
+		ticker.Stop()
+		p.Conn.Close()
+	}()
+
 	for {
 		select {
 		case msg, ok := <-p.Chan:
@@ -110,9 +99,8 @@ func playerWriteHandler(p *model.Player) {
 
 func playerReadHandler(p *model.Player) {
 	defer func() {
-		DeletePlayer(p.Nick)
-		p.Conn.Close()
 		close(p.Chan)
+		DeletePlayer(p.Nick)
 	}()
 
 	p.Conn.SetPongHandler(func(string) error {
