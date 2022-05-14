@@ -4,7 +4,7 @@ import "strconv"
 
 type BoardState struct {
 	Board          [8][8]string
-	ActiveColor    string
+	ActiveColor    Color
 	CastlingRights []string
 	EnPassant      string
 	HalfMove       int32

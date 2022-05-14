@@ -40,6 +40,7 @@ func CreateNewGame(c model.CreateNewGameParams, p *model.Player) *model.Game {
 	g.AddTimePerMove = time.Duration(sec) * time.Second
 	g.GameState = model.WaitsOpponent
 	g.Observers = append(g.Observers, p)
+	g.BoardState = model.BoardState{CastlingRights: []string{"K", "Q", "k", "q"}, EnPassant: "-"}
 
 	AddGame(&g)
 
