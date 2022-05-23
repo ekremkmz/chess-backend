@@ -95,7 +95,7 @@ func (g *Game) ToMap() map[string]any {
 		"timeControl": int64(g.TimeControl / time.Minute),
 		"adder":       int64(g.AddTimePerMove / time.Second),
 		"state":       g.GameState,
-		"board":       g.BoardState.ToMap(),
+		"boardState":  g.BoardState.ToMap(),
 	}
 
 	white := g.White.ToMap()
