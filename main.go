@@ -60,6 +60,8 @@ func setupRoutes() *gin.Engine {
 		auth.GET("/logout", AuthNeeded, rest.Logout)
 	}
 
+	r.GET("/search", AuthNeeded, rest.Search)
+
 	return r
 }
 

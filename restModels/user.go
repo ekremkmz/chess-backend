@@ -1,4 +1,4 @@
-package model
+package restModels
 
 import (
 	"os"
@@ -9,9 +9,11 @@ import (
 
 type User struct {
 	mgm.DefaultModel `bson:",inline"`
-	Nick             string `bson:"nick" json:"nick"`
-	Email            string `bson:"email" json:"email"`
-	Password         string `bson:"password" json:"password"`
+	Nick             string   `bson:"nick" json:"nick"`
+	Email            string   `bson:"email" json:"email"`
+	Friends          []string `bson:"friends" json:"friends"`
+	FriendRequests   []string `bson:"friendRequests" json:"friendRequests"`
+	Password         string   `bson:"password" json:"password"`
 }
 
 func (u *User) GenerateToken() (string, error) {

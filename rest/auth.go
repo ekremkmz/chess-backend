@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"chess-backend/rest/model"
+	"chess-backend/restModels"
 	"net/http"
 	"os"
 	"strconv"
@@ -26,12 +26,10 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	user := &model.User{}
-
-	ctx := mgm.Ctx()
+	user := &restModels.User{}
 
 	// Check if user already exists
-	if mgm.Coll(user).FindOne(ctx, bson.M{operator.Or: bson.A{bson.M{"email": params.Email}, bson.M{"nick": params.Nick}}}).Decode(user) == nil {
+	if mgm.Coll(user).FindOne(mgm.Ctx(), bson.M{operator.Or: bson.A{bson.M{"email": params.Email}, bson.M{"nick": params.Nick}}}).Decode(user) == nil {
 		switch {
 		case user.Email == params.Email:
 			c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Email already exists"})
@@ -75,7 +73,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	user := &model.User{}
+	user := &restModels.User{}
 	res := mgm.Coll(user).FindOne(mgm.Ctx(), bson.M{"nick": params.Nick})
 
 	if err := res.Decode(user); err != nil {
@@ -107,7 +105,13 @@ func Login(c *gin.Context) {
 
 	c.SetCookie("access_token", token, int(exp), "/", os.Getenv("DOMAIN"), false, httpOnly)
 
-	c.JSON(http.StatusOK, gin.H{"success": true, "data": gin.H{"nick": user.Nick, "email": user.Email}})
+	c.JSON(http.StatusOK, gin.H{"success": true,
+		"data": gin.H{"nick": user.Nick,
+			"email":          user.Email,
+			"friends":        user.Friends,
+			"friendRequests": user.FriendRequests,
+		},
+	})
 }
 
 func Logout(c *gin.Context) {

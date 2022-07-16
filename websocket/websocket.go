@@ -1,7 +1,8 @@
 package websocket
 
 import (
-	"chess-backend/websocket/model"
+	"chess-backend/syncslice"
+	"chess-backend/websocketModels"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -27,9 +28,10 @@ func WebsocketHandler(c *gin.Context) {
 
 	nick := token.(jwt.MapClaims)["nick"].(string)
 
-	AddPlayer(&model.Player{
-		Nick: nick,
-		Conn: ws,
-		Chan: make(chan []byte),
+	playerConnects(&websocketModels.Player{
+		Nick:          nick,
+		Conn:          ws,
+		Chan:          make(chan []byte),
+		OnlineFriends: syncslice.NewSyncSlice([]*websocketModels.Player{}),
 	})
 }
